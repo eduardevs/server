@@ -13,7 +13,7 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://gestiondecodesnippets.netlify.app"],
+    origin: ["http://localhost:3000", "https://snippet-manager-code.herokuapp.com"],
     credentials: true
   })
 );
