@@ -9,37 +9,33 @@ router.post("/", async (req, res) => {
 
     // validation
 
-    if (!email || !password || !passwordVerify) {
+    if (!email || !password || !passwordVerify)
       return res.status(400).json({
         errorMessage: "Please enter all required fields.",
       });
-    }
 
-    if (password.length < 8) {
+    if (password.length < 6)
       return res.status(400).json({
-        errorMessage: "Please enter a password of at least 8 characters.",
+        errorMessage: "Please enter a password of at least 6 characters.",
       });
-    }
 
-    if (password !== passwordVerify) {
+    if (password !== passwordVerify)
       return res.status(400).json({
         errorMessage: "Please enter the same twice for verification.",
       });
-    }
 
-    //   make sur no account exist for this email
+    // make sure no account exists for this email
+
     const existingUser = await User.findOne({ email });
-    // console.log(existingUser);
-    if (existingUser) {
+    if (existingUser)
       return res.status(400).json({
-        errorMessage: "An account with this email exists.",
+        errorMessage: "An account with this email already exists.",
       });
-    }
 
     // hash the password
+
     const salt = await bcrypt.genSalt();
     const passwordHash = await bcrypt.hash(password, salt);
-    // console.log(passwordHash);
 
     // save the user in the database
 
@@ -50,11 +46,7 @@ router.post("/", async (req, res) => {
 
     const savedUser = await newUser.save();
 
-    // res.send(savedUser);
-    // JWT token
-    // we create an objet for the data we want to protect
-    // we sign the token
-    // we GENERATE a password that we store in env variables
+    // create a JWT token
 
     const token = jwt.sign(
       {
@@ -63,17 +55,17 @@ router.post("/", async (req, res) => {
       process.env.JWT_SECRET
     );
 
-    // res.send(token);
-
     res
       .cookie("token", token, {
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === "development"
-        ? "lax"
-        : process.env.NODE_ENV === "production" && "none",
-      secure: process.env.NODE_ENV === "development"
-      ? false
-      : process.env.NODE_ENV === "production" && true,
+        sameSite:
+          process.env.NODE_ENV === "development"
+            ? "lax"
+            : process.env.NODE_ENV === "production" && "none",
+        secure:
+          process.env.NODE_ENV === "development"
+            ? false
+            : process.env.NODE_ENV === "production" && true,
       })
       .send();
   } catch (err) {
@@ -87,33 +79,30 @@ router.post("/login", async (req, res) => {
 
     // validation
 
-    if (!email || !password) {
+    if (!email || !password)
       return res.status(400).json({
         errorMessage: "Please enter all required fields.",
       });
-    }
 
-    //   get user account
+    // get user account
+
     const existingUser = await User.findOne({ email });
-
-    if (!existingUser) {
+    if (!existingUser)
       return res.status(401).json({
         errorMessage: "Wrong email or password.",
       });
-    }
 
     const correctPassword = await bcrypt.compare(
       password,
       existingUser.passwordHash
     );
 
-    if (!correctPassword) {
+    if (!correctPassword)
       return res.status(401).json({
         errorMessage: "Wrong email or password.",
       });
-    }
 
-    // JWT token
+    // create a JWT token
 
     const token = jwt.sign(
       {
@@ -122,17 +111,17 @@ router.post("/login", async (req, res) => {
       process.env.JWT_SECRET
     );
 
-    // res.send(token);
-
     res
       .cookie("token", token, {
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === "development"
-          ? "lax"
-          : process.env.NODE_ENV === "production" && "none",
-        secure: process.env.NODE_ENV === "development"
-        ? false
-        : process.env.NODE_ENV === "production" && true,
+        sameSite:
+          process.env.NODE_ENV === "development"
+            ? "lax"
+            : process.env.NODE_ENV === "production" && "none",
+        secure:
+          process.env.NODE_ENV === "development"
+            ? false
+            : process.env.NODE_ENV === "production" && true,
       })
       .send();
   } catch (err) {
@@ -143,6 +132,7 @@ router.post("/login", async (req, res) => {
 router.get("/loggedIn", (req, res) => {
   try {
     const token = req.cookies.token;
+
     if (!token) return res.json(null);
 
     const validatedUser = jwt.verify(token, process.env.JWT_SECRET);
@@ -152,7 +142,6 @@ router.get("/loggedIn", (req, res) => {
     return res.json(null);
   }
 });
-
 router.get("/logOut", (req, res) => {
   try {
     res.clearCookie("token").send();
